@@ -1,0 +1,18 @@
+# Infra mínima do MVP: apenas PostgreSQL.
+# O nó blockchain (Hardhat) corre localmente via `npm run node` em /contracts —
+# menos partes móveis numa demo ao vivo.
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: evidence-chain-db
+    environment:
+      POSTGRES_USER: evidence
+      POSTGRES_PASSWORD: evidence
+      POSTGRES_DB: evidence_chain
+    ports:
+      - "5433:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+volumes:
+  pgdata:

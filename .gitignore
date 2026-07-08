@@ -1,0 +1,9 @@
+node_modules/
+dist/
+.next/
+.env
+storage/
+contracts/cache/
+contracts/artifacts/
+contracts/deployment.json
+.env

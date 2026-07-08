@@ -1,0 +1,109 @@
+/* ==========================================================================
+   EvidenceChain - sistema de tokens
+   Paleta: papel frio + verde institucional profundo; estados de verificacao
+   em ambar/verde/vermelho. Hashes e numeros de caso sempre em mono.
+   ========================================================================== */
+:root {
+  --bg: #eef1f0;
+  --surface: #ffffff;
+  --ink: #17201c;
+  --ink-soft: #5a6660;
+  --line: #d8ded9;
+  --brand: #1c4634;        /* verde selo institucional */
+  --brand-ink: #ffffff;
+  --brand-soft: #e4ede7;
+  --sidebar: #0f1c15;
+  --sidebar-ink: #c9d6cc;
+  --ok: #1a7a3c;
+  --ok-bg: #e2f2e6;
+  --warn: #9a6200;
+  --warn-bg: #faf0da;
+  --err: #b3261e;
+  --err-bg: #f9e4e2;
+  --mono: ui-monospace, "SF Mono", "Cascadia Mono", "JetBrains Mono", Menlo, Consolas, monospace;
+  --sans: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", sans-serif;
+}
+
+* { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; }
+body { background: var(--bg); color: var(--ink); font-family: var(--sans); font-size: 15px; line-height: 1.5; }
+a { color: var(--brand); text-decoration: none; }
+a:hover { text-decoration: underline; }
+:focus-visible { outline: 2px solid var(--brand); outline-offset: 2px; }
+
+/* ---- estrutura ---- */
+.shell { display: flex; min-height: 100vh; }
+.sidebar { width: 232px; background: var(--sidebar); color: var(--sidebar-ink); padding: 20px 14px; display: flex; flex-direction: column; gap: 4px; flex-shrink: 0; }
+.sidebar .logo { color: #fff; font-weight: 700; letter-spacing: 0.06em; font-size: 15px; padding: 6px 10px 18px; }
+.sidebar .logo span { color: #7fb894; }
+.sidebar a { display: block; color: var(--sidebar-ink); padding: 9px 10px; border-radius: 7px; font-size: 14px; }
+.sidebar a:hover { background: rgba(255,255,255,0.07); text-decoration: none; }
+.sidebar a.active { background: rgba(127,184,148,0.16); color: #fff; }
+.sidebar .spacer { flex: 1; }
+.sidebar .who { font-size: 12.5px; padding: 8px 10px; border-top: 1px solid rgba(255,255,255,0.12); }
+.sidebar .who b { color: #fff; display: block; }
+.sidebar button.logout { margin-top: 8px; width: 100%; background: transparent; color: var(--sidebar-ink); border: 1px solid rgba(255,255,255,0.25); border-radius: 7px; padding: 7px; cursor: pointer; font-size: 13px; }
+.sidebar button.logout:hover { background: rgba(255,255,255,0.08); }
+.main { flex: 1; padding: 28px 34px; max-width: 1100px; }
+
+/* ---- tipografia utilitaria ---- */
+.eyebrow { font-size: 11.5px; text-transform: uppercase; letter-spacing: 0.12em; color: var(--ink-soft); font-weight: 600; }
+h1 { font-size: 22px; margin: 4px 0 20px; }
+h2 { font-size: 16px; margin: 26px 0 10px; }
+.mono { font-family: var(--mono); }
+
+/* ---- cartoes / tabelas / formularios ---- */
+.card { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 18px 20px; }
+.grid { display: grid; gap: 14px; }
+.grid.kpi { grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); }
+.kpi .n { font-size: 26px; font-weight: 700; }
+.kpi .l { font-size: 12.5px; color: var(--ink-soft); }
+
+table { width: 100%; border-collapse: collapse; background: var(--surface); border: 1px solid var(--line); border-radius: 10px; overflow: hidden; }
+th, td { text-align: left; padding: 10px 14px; border-bottom: 1px solid var(--line); font-size: 14px; }
+th { background: var(--brand-soft); font-size: 12px; text-transform: uppercase; letter-spacing: 0.07em; color: var(--brand); }
+tr:last-child td { border-bottom: none; }
+tr.click { cursor: pointer; }
+tr.click:hover td { background: #f6f8f6; }
+
+form.stack { display: flex; flex-direction: column; gap: 12px; max-width: 460px; }
+label { font-size: 13px; font-weight: 600; display: block; margin-bottom: 4px; }
+input, select, textarea { width: 100%; padding: 9px 11px; border: 1px solid var(--line); border-radius: 7px; font-size: 14px; font-family: inherit; background: #fff; color: var(--ink); }
+textarea { min-height: 80px; resize: vertical; }
+button.primary { background: var(--brand); color: var(--brand-ink); border: none; border-radius: 7px; padding: 10px 18px; font-size: 14px; font-weight: 600; cursor: pointer; }
+button.primary:hover { filter: brightness(1.12); }
+button.primary:disabled { opacity: 0.55; cursor: not-allowed; }
+button.ghost { background: transparent; border: 1px solid var(--line); border-radius: 7px; padding: 8px 14px; font-size: 13.5px; cursor: pointer; color: var(--ink); }
+button.ghost:hover { border-color: var(--brand); color: var(--brand); }
+
+.error { background: var(--err-bg); color: var(--err); border-radius: 7px; padding: 10px 12px; font-size: 13.5px; }
+.notice { background: var(--brand-soft); color: var(--brand); border-radius: 7px; padding: 10px 12px; font-size: 13.5px; }
+
+/* ---- pecas de identidade: hash chip + status pill + timeline ---- */
+.hash { font-family: var(--mono); font-size: 12.5px; background: #f0f3f1; border: 1px solid var(--line); border-radius: 6px; padding: 2px 7px; word-break: break-all; }
+.pill { display: inline-block; font-size: 11.5px; font-weight: 700; letter-spacing: 0.04em; padding: 3px 9px; border-radius: 99px; }
+.pill.CONFIRMED { background: var(--ok-bg); color: var(--ok); }
+.pill.PENDING { background: var(--warn-bg); color: var(--warn); }
+.pill.FAILED { background: var(--err-bg); color: var(--err); }
+.pill.neutral { background: #eceff0; color: var(--ink-soft); }
+
+/* timeline de cadeia de custodia - elemento assinatura */
+.timeline { list-style: none; margin: 0; padding: 0 0 0 4px; }
+.timeline li { position: relative; padding: 0 0 22px 26px; border-left: 2px solid var(--line); margin-left: 7px; }
+.timeline li:last-child { border-left-color: transparent; padding-bottom: 4px; }
+.timeline li::before { content: ""; position: absolute; left: -8px; top: 1px; width: 14px; height: 14px; border-radius: 50%; background: var(--surface); border: 3px solid var(--brand); }
+.timeline .t-title { font-weight: 600; font-size: 14px; }
+.timeline .t-meta { font-size: 12.5px; color: var(--ink-soft); }
+
+.verify-result { display: grid; gap: 8px; margin-top: 12px; }
+.verify-result .row { display: flex; justify-content: space-between; gap: 12px; font-size: 14px; border-bottom: 1px dashed var(--line); padding-bottom: 6px; }
+
+@media (max-width: 760px) {
+  .shell { flex-direction: column; }
+  .sidebar { width: 100%; flex-direction: row; flex-wrap: wrap; align-items: center; }
+  .sidebar .spacer, .sidebar .who { display: none; }
+  .main { padding: 18px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  * { animation: none !important; transition: none !important; }
+}

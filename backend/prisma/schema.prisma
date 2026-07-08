@@ -1,0 +1,122 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  ADMIN
+  INVESTIGATOR
+  EXPERT
+  SUPERVISOR
+}
+
+enum CaseStatus {
+  OPEN
+  CLOSED
+  ARCHIVED
+}
+
+enum TxType {
+  REGISTER
+  TRANSFER
+}
+
+enum TxStatus {
+  PENDING
+  CONFIRMED
+  FAILED
+}
+
+model User {
+  id               String            @id @default(uuid())
+  name             String
+  email            String            @unique
+  passwordHash     String
+  role             Role
+  createdAt        DateTime          @default(now())
+  casesCreated     Case[]            @relation("CaseCreatedBy")
+  evidencesCreated Evidence[]        @relation("EvidenceCreatedBy")
+  custody          Evidence[]        @relation("EvidenceCustodian")
+  transfersOut     CustodyTransfer[] @relation("TransferFrom")
+  transfersIn      CustodyTransfer[] @relation("TransferTo")
+  auditLogs        AuditLog[]
+}
+
+model Case {
+  id          String     @id @default(uuid())
+  number      String     @unique
+  title       String
+  description String
+  status      CaseStatus @default(OPEN)
+  createdById String
+  createdBy   User       @relation("CaseCreatedBy", fields: [createdById], references: [id])
+  createdAt   DateTime   @default(now())
+  evidences   Evidence[]
+}
+
+model Evidence {
+  id                 String                  @id @default(uuid())
+  caseId             String
+  case               Case                    @relation(fields: [caseId], references: [id])
+  name               String
+  type               String
+  sha256             String
+  sizeBytes          Int
+  storagePath        String
+  // Imutabilidade: o hash NUNCA muda. "Alterar" uma evidencia = criar uma
+  // NOVA linha com version+1 e parentEvidenceId a apontar para a anterior.
+  version            Int                     @default(1)
+  parentEvidenceId   String?
+  parent             Evidence?               @relation("EvidenceVersions", fields: [parentEvidenceId], references: [id])
+  versions           Evidence[]              @relation("EvidenceVersions")
+  currentCustodianId String
+  currentCustodian   User                    @relation("EvidenceCustodian", fields: [currentCustodianId], references: [id])
+  createdById        String
+  createdBy          User                    @relation("EvidenceCreatedBy", fields: [createdById], references: [id])
+  createdAt          DateTime                @default(now())
+  transfers          CustodyTransfer[]
+  transactions       BlockchainTransaction[]
+}
+
+model CustodyTransfer {
+  id            String   @id @default(uuid())
+  evidenceId    String
+  evidence      Evidence @relation(fields: [evidenceId], references: [id])
+  fromUserId    String
+  fromUser      User     @relation("TransferFrom", fields: [fromUserId], references: [id])
+  toUserId      String
+  toUser        User     @relation("TransferTo", fields: [toUserId], references: [id])
+  reason        String
+  txHash        String?
+  transferredAt DateTime @default(now())
+}
+
+model AuditLog {
+  id        String   @id @default(uuid())
+  userId    String?
+  user      User?    @relation(fields: [userId], references: [id])
+  action    String
+  entity    String
+  entityId  String
+  metadata  Json?
+  timestamp DateTime @default(now())
+}
+
+model BlockchainTransaction {
+  id          String    @id @default(uuid())
+  evidenceId  String
+  evidence    Evidence  @relation(fields: [evidenceId], references: [id])
+  type        TxType
+  status      TxStatus  @default(PENDING)
+  txHash      String?
+  blockNumber Int?
+  error       String?
+  // Argumentos da chamada on-chain, para permitir retry apos falha
+  payload     Json
+  createdAt   DateTime  @default(now())
+  confirmedAt DateTime?
+}
